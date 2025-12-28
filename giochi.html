@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Catalog - MC Stats</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+        :root {
+            --dark: #001122;
+            --darker: #000912;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --light: #0066ff;
+            --light-dim: rgba(0, 102, 255, 0.1);
+            --text-gray: #b0c4de;
+            --white: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background-color: var(--dark);
+            color: var(--white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .gradient-bg {
+            position: fixed;
+            top: -20%; left: -10%; width: 80vw; height: 80vw;
+            background: radial-gradient(circle, var(--light-dim) 0%, transparent 70%);
+            filter: blur(80px); z-index: -1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            z-index: 100;
+        }
+
+        .logo { font-weight: 800; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; }
+        .logo span { color: var(--light); }
+
+        .nav-menu { position: relative; padding-bottom: 20px; margin-bottom: -20px; }
+        .dropdown-btn {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; transition: 0.3s;
+        }
+        .dropdown-btn:hover { background: var(--light); }
+        
+        .dropdown-content {
+            display: none; position: absolute; right: 0; top: 100%; margin-top: 5px;
+            background-color: var(--darker); min-width: 220px; border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px; z-index: 1000; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .dropdown-content a { color: var(--text-gray); padding: 12px 16px; text-decoration: none; display: block; font-size: 0.9rem; transition: 0.2s; }
+        .dropdown-content a:hover { background-color: var(--light); color: white; padding-left: 20px; }
+        .nav-menu:hover .dropdown-content { display: block; }
+
+        .hero {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 50px;
+            padding: 60px 5%; max-width: 1600px; margin: 0 auto; align-items: center;
+        }
+        .hero-text h1 { font-size: 3.5rem; line-height: 1.1; margin-bottom: 20px; text-transform: uppercase; font-weight: 800; }
+        .hero-text span { color: var(--light); }
+        .hero-text p { color: var(--text-gray); font-size: 1.1rem; max-width: 500px; margin-bottom: 30px; }
+
+        .search-container { position: relative; max-width: 400px; }
+        .search-input {
+            width: 100%; padding: 15px 20px 15px 45px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
+            color: white; font-size: 1rem; outline: none;
+        }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); opacity: 0.5; }
+
+        .catalog-section { padding: 50px 5%; max-width: 1600px; margin: 0 auto; width: 100%; }
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
+
+        .game-card {
+            background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 15px; overflow: hidden; transition: 0.3s;
+            display: flex; flex-direction: column; text-decoration: none; color: inherit;
+        }
+        .game-card:hover { transform: translateY(-10px); border-color: var(--light); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .game-img { width: 100%; height: 180px; object-fit: cover; background: #000; }
+        .game-content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+        .game-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; color: #fff; }
+        .game-desc { 
+            font-size: 0.85rem; color: var(--text-gray); line-height: 1.4; margin-bottom: 20px; 
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .download-btn {
+            background: var(--light); color: white; text-align: center;
+            padding: 12px; border-radius: 8px; text-decoration: none;
+            font-weight: 600; font-size: 0.9rem; transition: 0.3s; margin-top: auto;
+        }
+
+        footer { padding: 50px 5%; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); margin-top: auto; }
+        .footer-logo { font-weight: 800; font-size: 1.8rem; opacity: 0.4; margin-bottom: 10px; }
+
+        .loader { width: 50px; height: 50px; border: 5px solid #FFF; border-bottom-color: var(--light); border-radius: 50%; display: block; margin: 50px auto; animation: rot 1s linear infinite; }
+        @keyframes rot { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; text-align: center; }
+            .search-container { margin: 0 auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="gradient-bg"></div>
+
+    <header>
+        <a href="index.html" class="logo">MC <span>STATS</span></a>
+        <nav class="nav-menu">
+            <div class="dropdown-btn">Strumenti ▼</div>
+            <div class="dropdown-content">
+                <a href="tracking-server.html">Tracking Server</a>
+                <a href="index.html">Risoluzione</a>
+                <a href="giochi.html" style="color: var(--light); font-weight: bold;">Game Catalog</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-text">
+                <h1>Game <span>Catalog</span> <br> Library</h1>
+                <p>Esplora la nostra libreria di giochi. Clicca su un titolo per vedere la descrizione completa, i requisiti e i link al download.</p>
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="gameSearch" class="search-input" placeholder="Cerca un gioco..." onkeyup="filterGames()">
+                </div>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); height: 350px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                <div style="font-size: 5rem; opacity: 0.1; font-weight: 800;">GAMES</div>
+            </div>
+        </section>
+
+        <section class="catalog-section">
+            <div class="section-header">
+                <h2>🎮 Recent Updates</h2>
+            </div>
+
+            <div id="loader" class="loader"></div>
+            <div id="gameGrid" class="grid-container"></div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-logo">FIVE STATS GAMES</div>
+        <p style="color: var(--text-gray); font-size: 0.8rem;">I dati dei giochi sono sincronizzati tramite Steam API.</p>
+    </footer>
+
+    <script>
+        // CONFIGURAZIONE: Inserisci Nome (opzionale), ID Steam e Link Download
+        const myGames = [
+            { name: "Europa Universalis V", id: "3450310", downloadUrl: "https://mega.nz/file/esempio1" },
+            { name: "The Witcher 3", id: "292030", downloadUrl: "https://mega.nz/file/esempio2" },
+            { name: "Baldur's Gate 3", id: "1086940", downloadUrl: "https://mega.nz/file/esempio3" },
+            { name: "GTA V", id: "271590", downloadUrl: "https://mega.nz/file/esempio4" },
+            { name: "Elden Ring", id: "1245620", downloadUrl: "https://mega.nz/file/esempio5" },
+            { name: "Hades", id: "1145360", downloadUrl: "https://mega.nz/file/esempio6" }
+        ];
+
+        let cachedData = [];
+
+        async function fetchGameData() {
+            const grid = document.getElementById('gameGrid');
+            const loader = document.getElementById('loader');
+
+            try {
+                const gamesPromises = myGames.map(async (game) => {
+                    try {
+                        // Utilizziamo un proxy diverso o proviamo la chiamata diretta per minimizzare errori
+                        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://store.steampowered.com/api/appdetails?appids=${game.id}&l=italian`)}`);
+                        const rawData = await response.json();
+                        const details = JSON.parse(rawData.contents)[game.id];
+                        
+                        if (details && details.success) {
+                            return { ...details.data, downloadUrl: game.downloadUrl, appId: game.id };
+                        }
+                    } catch (e) {
+                        console.warn(`Errore caricamento dati Steam per ID ${game.id}, uso dati locali.`);
+                    }
+                    
+                    // Fallback se l'API fallisce: crea una card base con i dati che abbiamo
+                    return {
+                        name: game.name || "Gioco Sconosciuto",
+                        header_image: `https://cdn.akamai.steamstatic.com/steam/apps/${game.id}/header.jpg`,
+                        short_description: "Dati Steam non disponibili momentaneamente. Clicca per i dettagli.",
+                        downloadUrl: game.downloadUrl,
+                        appId: game.id
+                    };
+                });
+
+                cachedData = (await Promise.all(gamesPromises)).filter(g => g !== null);
+                renderGames(cachedData);
+                loader.style.display = 'none';
+            } catch (error) {
+                console.error("Errore fatale:", error);
+                loader.innerHTML = "Errore nel caricamento della libreria.";
+            }
+        }
+
+        function renderGames(games) {
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = '';
+            games.forEach(info => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.innerHTML = `
+                    <img class="game-img" src="${info.header_image}" onerror="this.src='https://via.placeholder.com/400x200?text=Immagine+Non+Disponibile'">
+                    <div class="game-content">
+                        <h3 class="game-title">${info.name}</h3>
+                        <p class="game-desc">${info.short_description}</p>
+                        <a href="gioco-info.html?id=${info.appId}&dl=${encodeURIComponent(info.downloadUrl)}" class="download-btn">DETTAGLI & DOWNLOAD</a>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterGames() {
+            const query = document.getElementById('gameSearch').value.toLowerCase();
+            const filtered = cachedData.filter(g => g.name.toLowerCase().includes(query));
+            renderGames(filtered);
+        }
+
+        fetchGameData();
+    </script>
+</body>
+</html>

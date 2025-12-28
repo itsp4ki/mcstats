@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informazioni Gioco - MC Stats</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+        :root {
+            --dark: #000b14;
+            --darker: #00050a;
+            --light: #0066ff;
+            --text-gray: #b0c4de;
+            --white: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--white);
+            font-family: 'Poppins', sans-serif;
+            margin: 0; padding: 0;
+        }
+
+        header { padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo { font-weight: 800; font-size: 1.5rem; text-decoration: none; color: white; }
+        .logo span { color: var(--light); }
+
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 40px; }
+
+        /* Main Content */
+        .game-header img { width: 100%; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { font-size: 2.5rem; margin: 10px 0; }
+        
+        .section-box { background: var(--card-bg); padding: 25px; border-radius: 15px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.05); }
+        .section-title { font-size: 1.2rem; font-weight: 600; color: var(--light); margin-bottom: 15px; text-transform: uppercase; border-left: 4px solid var(--light); padding-left: 15px; }
+        
+        .description { color: var(--text-gray); line-height: 1.6; font-size: 0.95rem; }
+        .description b, .description strong { color: white; }
+
+        /* Sidebar stats */
+        .info-list { list-style: none; padding: 0; }
+        .info-list li { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; font-size: 0.9rem; }
+        .info-list li span { color: var(--text-gray); }
+        .info-list li strong { color: white; }
+
+        .tag { background: var(--light); color: white; padding: 4px 10px; border-radius: 5px; font-size: 0.75rem; margin-right: 5px; margin-bottom: 5px; display: inline-block; }
+
+        .download-area { text-align: center; margin-top: 20px; }
+        .btn-download { background: #55ff55; color: #000; padding: 15px 40px; border-radius: 10px; text-decoration: none; font-weight: 800; display: block; transition: 0.3s; }
+        .btn-download:hover { transform: scale(1.02); filter: brightness(1.1); }
+
+        .requirements { font-size: 0.85rem; color: var(--text-gray); white-space: pre-line; }
+
+        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="giochi.html" class="logo">MC <span>STATS</span></a>
+        <a href="giochi.html" style="color: var(--text-gray); text-decoration: none;">← Torna al catalogo</a>
+    </header>
+
+    <div id="content" class="container" style="display: none;">
+        <div class="main-info">
+            <div class="game-header">
+                <img id="gameBanner" src="" alt="">
+                <h1 id="gameTitle">Caricamento...</h1>
+            </div>
+
+            <div class="section-box">
+                <div class="section-title">Descrizione</div>
+                <div id="gameDesc" class="description"></div>
+            </div>
+
+            <div class="section-box">
+                <div class="section-title">Requisiti di Sistema</div>
+                <div id="gameReqs" class="requirements"></div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="section-box">
+                <div class="section-title">Dettagli</div>
+                <ul class="info-list">
+                    <li><span>Sviluppatore:</span> <strong id="dev">---</strong></li>
+                    <li><span>Editore:</span> <strong id="pub">---</strong></li>
+                    <li><span>Data rilascio:</span> <strong id="date">---</strong></li>
+                </ul>
+                <div id="categories" style="margin-top: 15px;"></div>
+            </div>
+
+            <div class="download-area">
+                <a href="#" id="dlLink" class="btn-download">SCARICA ORA</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="loader" style="text-align:center; margin-top:100px;">Caricamento informazioni da Steam...</div>
+
+    <script>
+        // Leggi l'ID e il link download dall'URL
+        const params = new URLSearchParams(window.location.search);
+        const appId = params.get('id');
+        const dlUrl = params.get('dl');
+
+        async function loadGameDetails() {
+            if(!appId) return;
+
+            try {
+                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://store.steampowered.com/api/appdetails?appids=${appId}&l=italian`)}`);
+                const raw = await res.json();
+                const data = JSON.parse(raw.contents)[appId].data;
+
+                // Popolamento campi
+                document.getElementById('gameTitle').innerText = data.name;
+                document.getElementById('gameBanner').src = data.screenshots[0].path_full || data.header_image;
+                document.getElementById('gameDesc').innerHTML = data.detailed_description;
+                document.getElementById('gameReqs').innerHTML = data.pc_requirements.minimum || "Non specificati";
+                document.getElementById('dev').innerText = data.developers[0];
+                document.getElementById('pub').innerText = data.publishers[0];
+                document.getElementById('date').innerText = data.release_date.date;
+                document.getElementById('dlLink').href = dlUrl;
+
+                // Categorie/Tag
+                const catDiv = document.getElementById('categories');
+                data.genres.forEach(genre => {
+                    const span = document.createElement('span');
+                    span.className = 'tag';
+                    span.innerText = genre.description;
+                    catDiv.appendChild(span);
+                });
+
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('content').style.display = 'grid';
+                document.title = `${data.name} - Informazioni`;
+
+            } catch (e) {
+                document.getElementById('loader').innerText = "Errore nel caricamento del gioco.";
+            }
+        }
+
+        loadGameDetails();
+    </script>
+</body>
+</html>
